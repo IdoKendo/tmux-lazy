@@ -6,6 +6,8 @@ that provides a more intuitive and nicer way to manage your Tmux plugins.
 Lazy.tmux is inspired by [lazy.nvim](https://github.com/folke/lazy.nvim) if you're
 using nvim and not using lazy.nvim, go give it a try!
 
+![image](./img/lazy.png)
+
 ⚠️  WARNING: lazy.tmux is still in early development stages. Some unintended behavior might occur.
 If you encounter any issue, please report it so I may fix it.
 
@@ -19,7 +21,7 @@ If you encounter any issue, please report it so I may fix it.
 Add this to your `.tmux.conf` and run `Ctrl-I` for TPM to install the plugin.
 
 ```conf
-set -g @plugin 'IdoKendo/lazy.tmux'
+set -g @plugin 'IdoKendo/tmux-lazy'
 ```
 
 This is going to be the last time you need to do this 😉.
