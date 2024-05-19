@@ -60,11 +60,13 @@ while true; do
             sh $PLUGINS_DIR/tpm/bin/install_plugins
         fi
     elif [ "$SELECTION" == "R" ] || [ "$SELECTION" == "Remove" ]; then
-        :
+        echo "Not implemented yet..."
+        sleep 1
     elif [ "$SELECTION" == "U" ] || [ "$SELECTION" == "Update" ]; then
-        :
-    elif [ "$SELECTION" == "S" ] || [ "$SELECTION" == "Sync" ]; then
         sh $PLUGINS_DIR/tpm/bin/update_plugins all
+    elif [ "$SELECTION" == "S" ] || [ "$SELECTION" == "Sync" ]; then
+        echo "Not implemented yet..."
+        sleep 1
     elif [ "$SELECTION" == "C" ] || [ "$SELECTION" == "Clean" ]; then
         sh $PLUGINS_DIR/tpm/bin/clean_plugins
     elif [ "$SELECTION" == "X" ] || [ "$SELECTION" == "Exit" ]; then

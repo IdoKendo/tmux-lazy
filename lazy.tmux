@@ -11,4 +11,4 @@ tmux_option_or_fallback() {
 	echo "$option_value"
 }
 
-tmux bind-key "$(tmux_option_or_fallback "@lazy-tmux-binding" "Z")" display-popup -h 60% -w 60% -T "Lazy.tmux" -E "cd $CURRENT_DIR && $CURRENT_DIR/scripts/lazy_tmux.sh"
+tmux bind-key "$(tmux_option_or_fallback "@lazy-tmux-binding" "Z")" display-popup -h 60% -w 40% -T "Lazy.tmux" -E "cd $CURRENT_DIR && $CURRENT_DIR/scripts/lazy_tmux.sh"
