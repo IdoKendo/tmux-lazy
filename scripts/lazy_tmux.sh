@@ -52,16 +52,21 @@ while true; do
     if [ -z "$SELECTION" ]; then
         exit 0
     elif [ "$SELECTION" == "I" ] || [ "$SELECTION" == "Install" ]; then
-        NEW_PLUGIN="$( sh $CURRENT_DIR/select_plugin.sh )"
-        if [ -z "$NEW_PLUGIN" ]; then
+        PLUGIN_NAME=$(gum input --placeholder "IdoKendo/tmux-lazy")
+        if [ -z "$PLUGIN_NAME" ]; then
            :
         else
+            NEW_PLUGIN="set -g @plugin '$PLUGIN_NAME'"
             sh $CURRENT_DIR/add_plugin.sh $PLUGINS_DIR $NEW_PLUGIN
             sh $PLUGINS_DIR/tpm/bin/install_plugins
         fi
     elif [ "$SELECTION" == "R" ] || [ "$SELECTION" == "Remove" ]; then
-        echo "Not implemented yet..."
-        sleep 1
+        PLUGIN_NAME=$(gum input --placeholder "tmux-lazy")
+        if [ -z "$PLUGIN_NAME" ]; then
+           :
+        else
+            sh $CURRENT_DIR/remove_plugin.sh $PLUGINS_DIR $PLUGIN_NAME
+        fi
     elif [ "$SELECTION" == "U" ] || [ "$SELECTION" == "Update" ]; then
         sh $PLUGINS_DIR/tpm/bin/update_plugins all
     elif [ "$SELECTION" == "S" ] || [ "$SELECTION" == "Sync" ]; then
