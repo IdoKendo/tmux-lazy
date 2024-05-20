@@ -6,6 +6,9 @@ that provides a more intuitive and nicer way to manage your Tmux plugins.
 Lazy.tmux is inspired by [lazy.nvim](https://github.com/folke/lazy.nvim) if you're
 using nvim and not using lazy.nvim, go give it a try!
 
+Also huge shoutout to [sessionx](https://github.com/omerxx/tmux-sessionx) as it
+encouraged me to create this plugin.
+
 ![image](./img/lazy.png)
 
 ⚠️  WARNING: lazy.tmux is still in early development stages. Some unintended behavior might occur.
@@ -42,8 +45,10 @@ You can fuzzy find the action that you want or the plugin that you wish to updat
 
 Available options:
 
-- `Install New Plugins` will open up a text box to add a new plugin to your tmux.conf file
-- `Update All Plugins` will update all plugins currently installed.
-- `Clean Stale Plugins` will delete artifacts of plugins that are not currently in-use.
+- `Install` will open a text box to add a new plugin to your tmux.conf file
+- `Remove` will open a text box to remove an existing plugin from your tmux.conf file and delete it from your system.
+- `Update` will update all plugins currently installed.
+- `Sync` is not yet implemented, but will sync the plugins to a lockfile in order to revert updates.
+- `Clean` will delete artifacts of plugins that are not currently in-use.
 - Selecting any plugin name will update it to its latest version. Note that `(new commit)` tag will appear on plugins that have new commits.
 - `Exit` will close lazy.tmux; This is also possible by clicking the `Esc` key.
