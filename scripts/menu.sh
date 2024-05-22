@@ -9,6 +9,11 @@ fi
 
 CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 PLUGINS_DIR="$( sh $CURRENT_DIR/plugins_dir.sh )"
+LOCKFILE="$PLUGINS_DIR/../lazy.tmux.lock"
+FIRST_RUN=0
+if [ ! -f "$LOCKFILE" ]; then
+    FIRST_RUN=1
+fi
 
 INSTALL=$(gum style --padding "0 1" --border double "[I] Install")
 REMOVE=$(gum style --padding "0 1" --border double "[R] Remove")
@@ -31,11 +36,16 @@ while true; do
 
           LOCAL=$(git rev-parse @)
           REMOTE=$(git rev-parse @{u})
+          NAME="$(basename "$item")"
 
           if [ "$LOCAL" != "$REMOTE" ]; then
-              echo "- $(basename "$item") (new commits)" | gum format
+              echo "- $NAME (new commits)" | gum format
           else
-              echo "- $(basename "$item")" | gum format
+              echo "- $NAME" | gum format
+          fi
+
+          if [ "$FIRST_RUN" = 1 ]; then
+              echo $NAME $LOCAL >> $LOCKFILE
           fi
 
           cd - > /dev/null
@@ -44,6 +54,7 @@ while true; do
         fi
       fi
     done
+    FIRST_RUN=0
     echo ""
 
     SELECTION=$(gum input)
@@ -68,9 +79,10 @@ while true; do
         fi
     elif [ "$SELECTION" == "U" ] || [ "$SELECTION" == "Update" ]; then
         sh $PLUGINS_DIR/tpm/bin/update_plugins all
+        FIRST_RUN=1
+        echo "" > $LOCKFILE
     elif [ "$SELECTION" == "S" ] || [ "$SELECTION" == "Sync" ]; then
-        echo "Not implemented yet..."
-        sleep 1
+        sh $CURRENT_DIR/sync_plugins.sh $PLUGINS_DIR $LOCKFILE
     elif [ "$SELECTION" == "C" ] || [ "$SELECTION" == "Clean" ]; then
         sh $PLUGINS_DIR/tpm/bin/clean_plugins
     elif [ "$SELECTION" == "X" ] || [ "$SELECTION" == "Exit" ]; then
@@ -84,6 +96,6 @@ while true; do
         echo "Decreased width, please restart Lazy.tmux"
         sleep 2
     else
-        sh $PLUGINS_DIR/tpm/bin/update_plugins $SELECTION
+        sh $CURRENT_DIR/update_plugin.sh $PLUGINS_DIR $LOCKFILE $SELECTION
     fi
 done
