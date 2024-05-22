@@ -20,4 +20,5 @@ if [ -n "$conf" ] && [ -n "$new_plugin" ] && ! grep -qF "$new_plugin" "$conf"; t
 $new_plugin
 
 " "$conf"
+    tmux source-file $conf
 fi
