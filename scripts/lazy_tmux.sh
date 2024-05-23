@@ -20,7 +20,6 @@ while true; do
     gum join --align center "$INSTALL" "$REMOVE" "$UPDATE" "$SYNC" "$CLEAN" "$EXIT"
 
     find "$PLUGINS_DIR" -type d -name .git | xargs -I {} -P 0 sh -c 'cd "$(dirname "{}")" && git fetch --quiet' 2> /dev/null
-    declare -a OPTIONS=("Install" "Remove" "Update" "Sync" "Clean")
 
     for item in "$PLUGINS_DIR"/*; do
       if [ -d "$item" ]; then
@@ -35,7 +34,6 @@ while true; do
           else
               echo "- $(basename "$item")" | gum format
           fi
-          options+=("$(basename "$item")")
 
           cd - > /dev/null
         else
@@ -44,8 +42,6 @@ while true; do
       fi
     done
     echo ""
-
-    options+=("Exit")
 
     SELECTION=$(gum input)
 
