@@ -19,7 +19,7 @@ while true; do
     clear
     gum join --align center "$INSTALL" "$REMOVE" "$UPDATE" "$SYNC" "$CLEAN" "$EXIT"
 
-    find "$PLUGINS_DIR" -type d -name .git | xargs -I {} sh -c 'cd "$(dirname "{}")"; git fetch --quiet'
+    find "$PLUGINS_DIR" -type d -name .git | xargs -I {} -P 0 sh -c 'cd "$(dirname "{}")" && git fetch --quiet' 2> /dev/null
     declare -a OPTIONS=("Install" "Remove" "Update" "Sync" "Clean")
 
     for item in "$PLUGINS_DIR"/*; do
