@@ -38,17 +38,25 @@ You can change it by adding this line with your desired key:
 set -g @lazy-tmux-binding '<mykey>'
 ```
 
+## 🔐 Lockfile
+
+Once you start using Lazy.tmux a new file will be generated alongside your `tmux.conf`
+under the name `lazy.tmux.lock` - If you are storing your config in version control,
+it is recommended that you store the lockfile as well, as it will allow you to restore
+plugins to the very same version that you have in case future breaking change happens.
+
 ## 🕹️ Usage
 
-Launching lazy.tmux opens a "pop up" with a fuzzy finder of actions and installed plugins.
-You can fuzzy find the action that you want or the plugin that you wish to update and click Enter.
+Launching lazy.tmux opens a "pop up" with an input dialog for actions and installed plugins.
+You can type the action that you want or the plugin that you wish to update and click Enter.
 
 Available options:
 
 - `Install` will open a text box to add a new plugin to your tmux.conf file
 - `Remove` will open a text box to remove an existing plugin from your tmux.conf file and delete it from your system.
-- `Update` will update all plugins currently installed.
-- `Sync` is not yet implemented, but will sync the plugins to a lockfile in order to revert updates.
+- `Update` will update all plugins currently installed and update the lockfile.
+- `Sync` will sync the plugins to a lockfile in order to revert updates.
 - `Clean` will delete artifacts of plugins that are not currently in-use.
-- Selecting any plugin name will update it to its latest version. Note that `(new commit)` tag will appear on plugins that have new commits.
+- Selecting any plugin name will update it to its latest version.
+Note that `(new commit)` tag will appear on plugins that have new commits. This will also update the lockfile.
 - `Exit` will close lazy.tmux; This is also possible by clicking the `Esc` key.
