@@ -8,7 +8,7 @@ if ! command -v gum &> /dev/null; then
 fi
 
 CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-PLUGINS_DIR="$( sh $CURRENT_DIR/plugins_dir.sh )"
+PLUGINS_DIR="$( sh "$CURRENT_DIR/plugins_dir.sh" )"
 LOCKFILE="$PLUGINS_DIR/../lazy.tmux.lock"
 FIRST_RUN=0
 if [ ! -f "$LOCKFILE" ]; then
@@ -27,15 +27,16 @@ while true; do
     gum join --align center "$INSTALL" "$REMOVE" "$UPDATE" "$SYNC" "$CLEAN" "$EXIT"
     echo "To change width use (+/-)"
 
-    find "$PLUGINS_DIR" -type d -name .git | xargs -I {} -P 0 sh -c 'cd "$(dirname "{}")" && git fetch --quiet' 2> /dev/null
+    find "$PLUGINS_DIR" -type d -name .git -print0 | xargs -0 -I {} -P 0 sh -c 'cd "$(dirname "{}")" && git fetch --quiet' 2> /dev/null
 
     for item in "$PLUGINS_DIR"/*; do
       if [ -d "$item" ]; then
         if [ -d "$item/.git" ]; then
-          cd "$item"
+          (
+          cd "$item" || return
 
           LOCAL=$(git rev-parse @)
-          REMOTE=$(git rev-parse @{u})
+          REMOTE=$(git rev-parse '@{u}')
           NAME="$(basename "$item")"
 
           if [ "$LOCAL" != "$REMOTE" ]; then
@@ -45,10 +46,9 @@ while true; do
           fi
 
           if [ "$FIRST_RUN" = 1 ]; then
-              echo $NAME $LOCAL >> $LOCKFILE
+              echo "$NAME" "$LOCAL" >> "$LOCKFILE"
           fi
-
-          cd - > /dev/null
+          )
         else
           echo "- $(basename "$item") (not a git repo)" | gum format
         fi
@@ -57,45 +57,58 @@ while true; do
     FIRST_RUN=0
     echo ""
 
-    SELECTION=$(gum input)
+    SELECTION=$(bash -c 'read -n1 -s key; echo "$key"')
 
-    if [ -z "$SELECTION" ]; then
-        exit 0
-    elif [ "$SELECTION" == "I" ] || [ "$SELECTION" == "Install" ]; then
-        PLUGIN_NAME=$(gum input --placeholder "IdoKendo/tmux-lazy")
-        if [ -z "$PLUGIN_NAME" ]; then
-           :
-        else
-            NEW_PLUGIN="set -g @plugin '$PLUGIN_NAME'"
-            sh $CURRENT_DIR/add_plugin.sh $PLUGINS_DIR $NEW_PLUGIN
-            sh $PLUGINS_DIR/tpm/bin/install_plugins
-        fi
-    elif [ "$SELECTION" == "R" ] || [ "$SELECTION" == "Remove" ]; then
-        PLUGIN_NAME=$(gum input --placeholder "tmux-lazy")
-        if [ -z "$PLUGIN_NAME" ]; then
-           :
-        else
-            sh $CURRENT_DIR/remove_plugin.sh $PLUGINS_DIR $PLUGIN_NAME
-        fi
-    elif [ "$SELECTION" == "U" ] || [ "$SELECTION" == "Update" ]; then
-        sh $PLUGINS_DIR/tpm/bin/update_plugins all
-        FIRST_RUN=1
-        echo "" > $LOCKFILE
-    elif [ "$SELECTION" == "S" ] || [ "$SELECTION" == "Sync" ]; then
-        sh $CURRENT_DIR/sync_plugins.sh $PLUGINS_DIR $LOCKFILE
-    elif [ "$SELECTION" == "C" ] || [ "$SELECTION" == "Clean" ]; then
-        sh $PLUGINS_DIR/tpm/bin/clean_plugins
-    elif [ "$SELECTION" == "X" ] || [ "$SELECTION" == "Exit" ]; then
-        exit 0
-    elif [ "$SELECTION" == "+" ]; then
-        sh $CURRENT_DIR/adjust_width.sh $PLUGINS_DIR $WIDTH "$((WIDTH + 5))"
-        echo "Increased width, please restart Lazy.tmux"
-        sleep 2
-    elif [ "$SELECTION" == "-" ]; then
-        sh $CURRENT_DIR/adjust_width.sh $PLUGINS_DIR $WIDTH "$((WIDTH - 5))"
-        echo "Decreased width, please restart Lazy.tmux"
-        sleep 2
-    else
-        sh $CURRENT_DIR/update_plugin.sh $PLUGINS_DIR $LOCKFILE $SELECTION
-    fi
+    case "$SELECTION" in
+        i|I)
+            PLUGIN_NAME=$(gum input --placeholder "IdoKendo/tmux-lazy")
+            if [ -n "$PLUGIN_NAME" ]; then
+                sh "$CURRENT_DIR/add_plugin.sh" "$PLUGINS_DIR" "set -g @plugin '$PLUGIN_NAME'"
+                sh "$PLUGINS_DIR/tpm/bin/install_plugins"
+            fi
+            ;;
+        r|R)
+            INSTALLED_PLUGINS=""
+            for item in "$PLUGINS_DIR"/*; do
+              if [ -d "$item" ]; then
+                NAME="$(basename "$item")"
+                INSTALLED_PLUGINS="$INSTALLED_PLUGINS$NAME"$'\n'
+              fi
+            done
+            
+            if command -v fzf &> /dev/null; then
+                PLUGIN_NAME=$(echo "$INSTALLED_PLUGINS" | fzf --prompt "Select plugin to remove: " --height 40%)
+            else
+                PLUGIN_NAME=$(echo "$INSTALLED_PLUGINS" | gum filter --placeholder "Select plugin to remove...")
+            fi
+            
+            if [ -n "$PLUGIN_NAME" ]; then
+                sh "$CURRENT_DIR/remove_plugin.sh" "$PLUGINS_DIR" "$PLUGIN_NAME"
+            fi
+            ;;
+        u|U)
+            sh "$PLUGINS_DIR/tpm/bin/update_plugins" all
+            FIRST_RUN=1
+            echo "" > "$LOCKFILE"
+            ;;
+        s|S)
+            sh "$CURRENT_DIR/sync_plugins.sh" "$PLUGINS_DIR" "$LOCKFILE"
+            ;;
+        c|C)
+            sh "$PLUGINS_DIR/tpm/bin/clean_plugins"
+            ;;
+        x|X|$'\e')
+            exit 0
+            ;;
+        +)
+            sh "$CURRENT_DIR/adjust_width.sh" "$PLUGINS_DIR" "$WIDTH" "$((WIDTH + 5))"
+            echo "Increased width, please restart Lazy.tmux"
+            sleep 2
+            ;;
+        -)
+            sh "$CURRENT_DIR/adjust_width.sh" "$PLUGINS_DIR" "$WIDTH" "$((WIDTH - 5))"
+            echo "Decreased width, please restart Lazy.tmux"
+            sleep 2
+            ;;
+    esac
 done
